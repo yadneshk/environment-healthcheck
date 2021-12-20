@@ -1,0 +1,37 @@
+---
+- name: Validation for pcmk_reboot_action operation specific to IPMI fencing resources
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Get pcmk_reboot_action at cluster level
+      shell: "pcs property show | egrep -io pcmk_reboot_action.*"
+      register: output_cluster
+      failed_when: output_cluster.rc not in [ 0, 1 ]
+
+    - debug:
+        msg: "{{output_cluster.stdout_lines}}"
+
+    - name: Get pcmk_reboot_action for kdump resource
+      shell: "pcs stonith  show kdump | egrep -io pcmk_reboot_action=off"
+      register: output_kdump
+      failed_when: output_kdump.rc not in [ 0, 1 ]
+
+    - debug:
+        msg: "{{output_kdump.stdout_lines}}"
+
+    - name: Get pcmk_reboot_action for stonith-fence_compute-fence-nova resource
+      shell: "pcs stonith  show stonith-fence_compute-fence-nova | egrep -io pcmk_reboot_action=off"
+      register: output_fence_compute
+      failed_when: output_fence_compute.rc not in [ 0, 1 ]
+
+    - debug:
+        msg: "{{output_fence_compute.stdout_lines}}"
+
+
+    - name: Get pcmk_reboot_action for stonith-fence_ipmilan resources
+      shell: "pcs stonith | grep -o stonith-fence_ipmilan............. | awk '{dups[$1]++} END{for (num in dups) {print num}}' | xargs pcs stonith show | egrep -io pcmk_reboot_action=off"
+      register: output_fence_ipmilan
+      failed_when: output_fence_ipmilan.rc not in [ 0, 1 ]
+
+    - debug:
+        msg: "{{output_fence_ipmilan.stdout_lines}}"
