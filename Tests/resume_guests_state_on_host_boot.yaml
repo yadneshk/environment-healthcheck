@@ -1,0 +1,16 @@
+---
+- name: "Validation for resume_guests_state_on_host_boot. parameter on compute nodes"
+  hosts: localhost
+  connection: local
+  vars:
+    param_value: true
+  tasks:
+    - name: Slurp resume_guests_state_on_host_boot from compute node files
+      slurp:
+        src: /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf
+      register: resumeparameter
+
+
+    - name: Retrieve resume_guests_state_on_host_boot parameter status from nova.conf file
+      debug:
+         msg: "{{ resumeparameter['content']| b64decode | regex_findall('resume_guests_state_on_host_boot.*')}}"
